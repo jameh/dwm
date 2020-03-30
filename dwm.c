@@ -107,6 +107,12 @@ typedef struct {
 } Key;
 
 typedef struct {
+	const char *signame;
+	void (*func)(const Arg *);
+	const Arg arg;
+} Signal;
+
+typedef struct {
 	const char *symbol;
 	void (*arrange)(Monitor *);
 } Layout;
@@ -1012,6 +1018,43 @@ keypress(XEvent *e)
 			keys[i].func(&(keys[i].arg));
 }
 
+int
+fake_signal(void)
+{
+	char fsignal[256];
+	char indicator[9] = "fsignal:";
+	char *signame;
+	int i;
+	size_t len_signame1, len_signame2, len_fsignal, len_indicator = strlen(indicator);
+
+	// Get root name property
+	if (gettextprop(root, XA_WM_NAME, fsignal, sizeof(fsignal))) {
+		len_fsignal = strlen(fsignal);
+
+		// Check if signal starts with indicator
+		if (len_indicator < len_fsignal && strncmp(indicator, fsignal, len_indicator) == 0) {
+			signame = &fsignal[len_indicator];
+			len_signame1 = len_fsignal - len_indicator;
+
+			for (i = 0; i < LENGTH(signals); i++) {
+				len_signame2 = strlen(signals[i].signame);
+				if (!strncmp(signals[i].signame, signame, len_signame1 < len_signame2 ? len_signame1 : len_signame2))
+					break;
+			}
+
+			// we have a fake signal to handle
+			if (i < LENGTH(signals))
+				signals[i].func(&(signals[i].arg));
+
+			// A fake signal was sent
+			return 1;
+		}
+	}
+
+	// No fake signal was sent, so proceed with update
+	return 0;
+}
+
 void
 killclient(const Arg *arg)
 {
@@ -1229,8 +1272,10 @@ propertynotify(XEvent *e)
 	Window trans;
 	XPropertyEvent *ev = &e->xproperty;
 
-	if ((ev->window == root) && (ev->atom == XA_WM_NAME))
-		updatestatus();
+	if ((ev->window == root) && (ev->atom == XA_WM_NAME)) {
+		if (!fake_signal())
+			updatestatus();
+	}
 	else if (ev->state == PropertyDelete)
 		return; /* ignore */
 	else if ((c = wintoclient(ev->window))) {

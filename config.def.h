@@ -117,3 +117,34 @@ static Button buttons[] = {
 	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
 };
 
+/* signal definitions */
+/* trigger signals using `xsetroot -name "fsignal:<signame>"` */
+static Signal signals[] = {
+	// alphabetical by function
+	/* signum             function        argument  */
+	{ "dmenu",            spawn,          {.v = dmenucmd } },
+	{ "term",             spawn,          {.v = termcmd } },
+	{ "focusmon-next",    focusmon,       {.i = +1 } },
+	{ "focusmon-prev",    focusmon,       {.i = -1 } },
+	{ "focusstack-next",  focusstack,     {.i = +1 } },
+	{ "focusstack-prev",  focusstack,     {.i = -1 } },
+	{ "nmaster-inc",      incnmaster,     {.i = +1 } },
+	{ "nmaster-dec",      incnmaster,     {.i = -1 } },
+	{ "killclient",       killclient,     {0} },
+	{ "quit",             quit,           {0} },
+	{ "layout-tile",      setlayout,      {.v = &layouts[0]} },
+	{ "layout-float",     setlayout,      {.v = &layouts[1]} },
+	{ "layout-monocle",   setlayout,      {.v = &layouts[2]} },
+	{ "layout-cmaster",   setlayout,      {.v = &layouts[3]} },
+	{ "layout-cfmaster",  setlayout,      {.v = &layouts[4]} },
+	{ "mfact-inc",        setmfact,       {.f = +0.05} },
+	{ "mfact-dec",        setmfact,       {.f = -0.05} },
+	{ "tagmon-inc",       tagmon,         {.i = +1 } },
+	{ "tagmon-dec",       tagmon,         {.i = -1 } },
+	{ "focusmon-inc",     focusmon,       {.i = -1 } },
+	{ "focusmon-dec",     focusmon,       {.i = +1 } },
+	{ "togglebar",        togglebar,      {0} },
+	{ "togglefloat",      togglefloating, {0} },
+	{ "view",             view,           {0} },
+	{ "zoom",             zoom,           {0} },
+};
