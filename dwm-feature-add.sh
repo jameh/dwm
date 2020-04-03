@@ -4,18 +4,26 @@ PATCHES_URL="https://dwm.suckless.org/patches/$1/"
 
 [ -n "$DWM_GIT_DIR" ] && cd "$DWM_GIT_DIR"
 
+err_log() {
+	echo "$@" 1>&2
+}
+
+out_log() {
+	echo "$@"
+}
+
 exit_on_fail() {
 	exit_code="$?"
 	[ "$exit_code" -eq 0 ] && return 0
 	[ -n "$2" ] && exit_code="$2"
 
 	[ -n "$3" ] && error_handler="$3"
-	echo $@
+	err_log $@
 	[ $("$error_handler" "$exit_code") -eq 0 ] && return 0
 
 	exit_msg="$1"
-	[ -n "$exit_msg" ] && echo "$exit_msg"
-	echo "Exiting."
+	[ -n "$exit_msg" ] && err_log "$exit_msg"
+	err_log "Exiting."
 	exit "$exit_code"
 }
 
@@ -28,7 +36,6 @@ check_git() {
 }
 
 get_patch_list() {
-	echo "Downloading patch list from $PATCHES_URL:"
 
 	_patches_html=$(curl "$PATCHES_URL")
 	exit_on_fail "Download error."
@@ -37,7 +44,7 @@ get_patch_list() {
 	[ -n "$_patches_list" ]
 	exit_on_fail "No patches found at $PATCHES_URL"
 
-	return "$_patches_list"
+	echo "$_patches_list"
 }
 
 select_patch() {
@@ -53,7 +60,6 @@ select_patch() {
 
 download_patch() {
 	_patch_url="$PATCHES_URL/$1"
-	echo "Downloading $_patch_url"
 	return $(curl "$_patch_url")
 }
 
@@ -72,7 +78,7 @@ checkout_handler() {
 
 		read -p "delete existing branch $_branch_name? [n] " _delete
 		if [ "$_delete" = "y" ] && [ "$_delete" = "Y" ]; then
-			echo "Not deleting $_branch_name"
+			out_log "Not deleting $_branch_name"
 			return 128
 		else
 			git branch -D "$_branch_name"
@@ -84,7 +90,10 @@ checkout_handler() {
 
 check_git
 
+out_log "Downloading patch list from $PATCHES_URL:"
 patch_name=$(select_patch $(get_patch_list))
+
+out_log "Downloading patch"
 patch=$(download_patch "$patch_name")
 revision=$(get_base_revision "$patch_name")
 
