@@ -116,6 +116,8 @@ static Signal signals[] = {
 	{ "focusstack-prev",  focusstack,     {.i = -1 } },
 	{ "nmaster-inc",      incnmaster,     {.i = +1 } },
 	{ "nmaster-dec",      incnmaster,     {.i = -1 } },
+	{ "rotate-up",        inplacerotate,  {.i = +1} },
+	{ "rotate-down",      inplacerotate,  {.i = -1} },
 	{ "killclient",       killclient,     {0} },
 	{ "quit",             quit,           {0} },
 	{ "setgaps-inc",      setgaps,        {.i = -1 } },
